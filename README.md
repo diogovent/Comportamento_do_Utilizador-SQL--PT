@@ -55,3 +55,79 @@ flowchart TD
     O --> P[SELECT final]
     P --> Q[Engajamento_28_Vida]
 ````
+
+---
+
+Descrição de cada CTE
+
+| #  | CTE                         | Responsabilidade |
+|----|-----------------------------|------------------|
+| 1  | tb_transacoes              | Parse de datas, cálculo de `Diff_Date` (dias decorridos) e hora da transação |
+| 2  | tb_cliente                 | Idade na base do cliente |
+| 3  | tb_sumario_transacoes      | Contagem de transações, saldo e pontos por janelas temporais |
+| 4  | tb_transacao_produto       | Enriquecimento com nome e categoria do produto |
+| 5  | tb_cliente_produto         | Frequência de uso por produto, cliente e janela |
+| 6  | tb_cliente_produto_rn      | Identificação do produto mais usado com `ROW_NUMBER()` |
+| 7  | tb_cliente_dia             | Transações por dia da semana (D28) |
+| 8  | tb_cliente_dia_rn          | Dia da semana mais ativo |
+| 9  | tb_cliente_periodo         | Transações por período do dia (D28) |
+| 10 | tb_cliente_periodo_rn      | Período do dia mais ativo |
+| 11 | tb_join                    | Consolidação final: uma linha por cliente |
+
+---
+
+⚠️ Cobertura do Output
+A base tem 4.962 clientes, mas 1.469 (~30%) nunca realizaram uma transação. Como o output parte de tb_sumário_transações 
+(que só produz linhas para clientes com ao menos uma transação), esses clientes inativos são excluídos do resultado final.
+Para incluir todos os clientes (ativos e inativos), substituir tb_sumário_transações como base e usar clientes com LEFT JOINs.
+
+---
+
+🗃️ Schema das Tabelas de Origem
+
+## Modelo de Dados
+
+```mermaid
+erDiagram
+    clientes ||--o{ transacoes : possui
+    transacoes ||--o{ transacao_produto : gera
+    produtos ||--o{ transacao_produto : compoe
+
+    clientes {
+        int idCliente PK
+        int qtdePontos
+        datetime DtCriacao
+        datetime DtAtualizacao
+        int flTwitch
+        int flYouTube
+        int flEmail
+        int flBlueSky
+        int flInstagram
+    }
+
+    transacoes {
+        int IdTransacao PK
+        int IdCliente FK
+        int QtdePontos
+        datetime DtCriacao
+        string DescSistemaOrigem
+    }
+
+    transacao_produto {
+        int idTransacaoProduto PK
+        int IdTransacao FK
+        int IdProduto FK
+        int QtdeProduto
+        float vlProduto
+    }
+
+    produtos {
+        int IdProduto PK
+        string DescNomeProduto
+        string DescDescricaoProduto
+        string DescCategoriaProduto
+    }
+````
+
+---
+
