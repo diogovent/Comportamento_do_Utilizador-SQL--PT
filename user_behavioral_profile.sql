@@ -1,22 +1,22 @@
 ============================================================
 Programa de Pontos — Plataforma Twitch / Cursos
 ============================================================
--- Objetivo: Construir uma tabela analítica com o perfil
--- comportamental completo de cada usuário.
---
--- Métricas geradas:
---   • Quantidade de transações         (Vida, D7, D14, D28, D56)
---   • Dias desde a última transação    (recência)
---   • Idade na base                    (dias desde o cadastro)
---   • Produto mais usado               (Vida, D7, D14, D28, D56)
---   • Categoria do produto mais usado  (Vida, D7, D14, D28, D56)
---   • Saldo de pontos atual
---   • Pontos acumulados positivos      (Vida, D7, D14, D28, D56)
---   • Pontos acumulados negativos      (Vida, D7, D14, D28, D56)
---   • Dia da semana mais ativo         (D28)
---   • Período do dia mais ativo        (D28)
---   • Engajamento D28 vs. Vida
---   • Plataformas conectadas           (Twitch, YouTube, Email, etc.)
+Objetivo: Construir uma tabela analítica com o perfil
+comportamental completo de cada usuário.
+    
+ Métricas geradas:
+    • Quantidade de transações         (Vida, D7, D14, D28, D56)
+    • Dias desde a última transação    (recência)
+    • Idade na base                    (dias desde o cadastro)
+    • Produto mais usado               (Vida, D7, D14, D28, D56)
+    • Categoria do produto mais usado  (Vida, D7, D14, D28, D56)
+    • Saldo de pontos atual
+    • Pontos acumulados positivos      (Vida, D7, D14, D28, D56)
+    • Pontos acumulados negativos      (Vida, D7, D14, D28, D56)
+    • Dia da semana mais ativo         (D28)
+    • Período do dia mais ativo        (D28)
+    • Engajamento D28 vs. Vida
+    • Plataformas conectadas           (Twitch, YouTube, Email, etc.)
 --
 -- Compatibilidade: SQLite
 --
