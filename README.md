@@ -87,47 +87,23 @@ Para incluir todos os clientes (ativos e inativos), substituir tb_sumário_trans
 
 ## Modelo de Dados
 
-```mermaid
-erDiagram
-    clientes ||--o{ transacoes : possui
-    transacoes ||--o{ transacao_produto : gera
-    produtos ||--o{ transacao_produto : compoe
-
-    clientes {
-        int idCliente PK
-        int qtdePontos
-        datetime DtCriacao
-        datetime DtAtualizacao
-        int flTwitch
-        int flYouTube
-        int flEmail
-        int flBlueSky
-        int flInstagram
-    }
-
-    transacoes {
-        int IdTransacao PK
-        int IdCliente FK
-        int QtdePontos
-        datetime DtCriacao
-        string DescSistemaOrigem
-    }
-
-    transacao_produto {
-        int idTransacaoProduto PK
-        int IdTransacao FK
-        int IdProduto FK
-        int QtdeProduto
-        float vlProduto
-    }
-
-    produtos {
-        int IdProduto PK
-        string DescNomeProduto
-        string DescDescricaoProduto
-        string DescCategoriaProduto
-    }
-````
-
 ---
+
+💡 Decisões Técnicas
+
+julianday() — cálculo de diferença de datas em dias no SQLite, sem depender de extensões externas.
+
+substr(DtCriacao, 1, 19) — remove milissegundos (.114000) e fusos horários que existem na coluna DtCriacao, garantindo compatibilidade com datetime() e strftime().
+
+ROW_NUMBER() com desempate — o critério secundário ORDER BY ... DESC, DescNomeProduto ASC garante resultados determinísticos em caso de empate 
+entre dois produtos com a mesma frequência.
+
+NULLIF no engajamento — 1.0 * D28 / NULLIF(Vida, 0) evita erro de divisão por zero para clientes sem histórico.
+COALESCE consistente — Dia_Semana usa 'N/A' (texto) e não -1 (integer), porque strftime('%w', ...) retorna TEXT no SQLite 
+— misturar tipos pode causar comportamentos inesperados em ferramentas analíticas.
+
+Pontos negativos como valores negativos — facilita o cálculo direto de saldo e a distinção entre crédito/débito sem precisar de colunas extras.
+
+Categoria do produto incluída — além do nome do produto mais usado, a query retorna a categoria (chat, present, espada, armadura, etc.), 
+útil para segmentações de alto nível.
 
