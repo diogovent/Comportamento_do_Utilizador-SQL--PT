@@ -17,33 +17,29 @@ comportamental completo de cada usuário.
     • Período do dia mais ativo        (D28)
     • Engajamento D28 vs. Vida
     • Plataformas conectadas           (Twitch, YouTube, Email, etc.)
---
--- Compatibilidade: SQLite
---
--- ⚠️  Nota importante sobre cobertura:
---     A base possui 4.962 clientes registados, dos quais 1.469
---     (~30%) nunca realizaram transações. Como o output parte de
---     tb_sumário_transações (que agrega apenas clientes com ao
---     menos 1 transação), estes clientes inativos são EXCLUÍDOS
---     do resultado final. Para incluí-los, o ponto de partida
---     deve ser a tabela `clientes` com LEFT JOINs.
--- ============================================================
 
+Compatibilidade: SQLite
+    
+⚠️  Nota importante sobre cobertura:
+    A base possui 4.962 clientes registados, dos quais 1.469(~30%) nunca realizaram transações. 
+    Como o output parte detb_sumário_transações (que agrega apenas clientes com aomenos 1 transação), 
+    estes clientes inativos são EXCLUÍDOS do resultado final. Para incluí-los, o ponto de partida deve 
+    ser a tabela `clientes` com LEFT JOINs.
+    
+============================================================
+
+1. tb_transações
+    Limpeza e enriquecimento da tabela de transações brutas.
+    
+        • substr(DtCriacao, 1, 19) → remove milissegundos e fusos, 
+    garantindo formato 'YYYY-MM-DD HH:MM:SS' compatível com as funções 
+    datetime() e strftime() do SQLite.
+    
+        • Diff_Date: dias corridos desde a transação (float). Valores próximos de 0 = transações recentes.
+    
+        • Dt_Hora: hora extraída como integer para classificação de período do dia na CTE tb_cliente_periodo.
 
 WITH
-
--- ------------------------------------------------------------
--- 1. tb_transações
--- Limpeza e enriquecimento da tabela de transações brutas.
---
--- • substr(DtCriacao, 1, 19) → remove milissegundos e fusos,
---   garantindo formato 'YYYY-MM-DD HH:MM:SS' compatível com
---   as funções datetime() e strftime() do SQLite.
--- • Diff_Date: dias corridos desde a transação (float).
---   Valores próximos de 0 = transações recentes.
--- • Dt_Hora: hora extraída como integer para classificação
---   de período do dia na CTE tb_cliente_periodo.
--- ------------------------------------------------------------
 tb_transações AS (
 
     SELECT
