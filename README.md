@@ -3,11 +3,12 @@
 📋 Objetivo
 Este projeto constrói uma tabela analítica que consolida o perfil comportamental de cada usuário, combinando histórico de transações,
 padrões temporais e uso de produtos. 
+
 O resultado é uma base pronta para segmentação, modelos de machine learning ou dashboards de CRM.
 
 ---
 
-Questões que tinha de chegar
+Metas
 
  - Quantidade de transações históricas (vida, D7, D14, D28, D56);
  - Dias desde a última transação;
