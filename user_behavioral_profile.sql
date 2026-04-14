@@ -1,7 +1,6 @@
--- ============================================================
--- USER BEHAVIORAL PROFILE
--- Programa de Pontos — Plataforma Twitch / Cursos
--- ============================================================
+============================================================
+Programa de Pontos — Plataforma Twitch / Cursos
+============================================================
 -- Objetivo: Construir uma tabela analítica com o perfil
 -- comportamental completo de cada usuário.
 --
