@@ -87,6 +87,8 @@ Para incluir todos os clientes (ativos e inativos), substituir tb_sumário_trans
 
 ## Modelo de Dados
 
+## Modelo de Dados
+
 ```mermaid
 erDiagram
     clientes ||--o{ transacoes : possui
