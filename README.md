@@ -9,6 +9,18 @@ O resultado é uma base pronta para segmentação, modelos de machine learning o
 
 ---
 
+Como aceder
+
+  Este projeto foi feito no Visual Studio Code com a extenção do SQL Lite, o link dos dados retirados (https://www.kaggle.com/datasets/teocalvo/teomewhy-loyalty-system)
+
+  No repusitório tem uns quanto ficheiros sendo o "etl_projeto.sql" é o projeto final em que se puser no SQL Lite irá funcionar perfeitamente.
+
+  O ficheiro de nome "user_behavioral_profile.sql" tem os meus comentários para ajudar entender o meu projeto.
+
+
+
+---
+
 Metas
 
  - Quantidade de transações históricas (vida, D7, D14, D28, D56);
