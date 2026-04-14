@@ -289,12 +289,15 @@ tb_cliente_periodo AS (
     GROUP BY IdCliente, Periodo
 ),
 
-
--- ------------------------------------------------------------
--- 10. tb_cliente_periodo_rn
--- Ranqueia períodos por volume de transações.
--- RN = 1 → período mais ativo nos últimos 28 dias.
--- ------------------------------------------------------------
+---
+    
+10. tb_cliente_periodo_rn
+    
+    Ranqueia períodos por volume de transações.
+    
+    RN = 1 → período mais ativo nos últimos 28 dias.
+    
+--------------------------------------------------------------
 tb_cliente_periodo_rn AS (
 
     SELECT
@@ -304,22 +307,25 @@ tb_cliente_periodo_rn AS (
     FROM tb_cliente_periodo
 ),
 
-
--- ------------------------------------------------------------
--- 11. tb_join
--- Consolida todas as CTEs em uma única linha por cliente.
---
--- COALESCE garante que clientes sem atividade nos últimos 28
--- dias não gerem NULLs no output:
---   • Dia_Semana_D28: 'N/A' (texto, consistente com strftime)
---   • Periodo_D28:    'Sem Informação'
--- ------------------------------------------------------------
+---
+    
+11. tb_join
+    
+    Consolida todas as CTEs em uma única linha por cliente.
+    
+    COALESCE garante que clientes sem atividade nos últimos 28 dias não gerem NULLs no output:
+    
+        • Dia_Semana_D28: 'N/A' (texto, consistente com strftime)
+        • Periodo_D28:    'Sem Informação'
+    
+--------------------------------------------------------------
 tb_join AS (
 
     SELECT
         t1.*,
 
-        -- Dados cadastrais e plataformas conectadas
+            **Dados cadastrais e plataformas conectadas**
+    
         t2.Idade_Base,
         t2.flTwitch,
         t2.flYouTube,
@@ -327,7 +333,8 @@ tb_join AS (
         t2.flBlueSky,
         t2.flInstagram,
 
-        -- Produto + categoria mais usados por janela temporal
+            **Produto + categoria mais usados por janela temporal**
+    
         t3.DescNomeProduto      AS Produto_Vida,
         t3.DescCategoriaProduto AS Categoria_Produto_Vida,
 
@@ -343,11 +350,12 @@ tb_join AS (
         t7.DescNomeProduto      AS Produto_D7,
         t7.DescCategoriaProduto AS Categoria_Produto_D7,
 
-        -- Dia da semana mais ativo em D28
-        -- '0'=Dom '1'=Seg '2'=Ter '3'=Qua '4'=Qui '5'=Sex '6'=Sáb
+            **Dia da semana mais ativo em D28**
+    
         COALESCE(t8.Dia_Semana, 'N/A')          AS Dia_Semana_Mais_Ativo_D28,
 
-        -- Período do dia mais ativo em D28
+            **Período do dia mais ativo em D28**
+    
         COALESCE(t9.Periodo, 'Sem Informação')  AS Periodo_Mais_Ativo_D28
 
     FROM tb_sumário_transações AS t1
@@ -355,45 +363,54 @@ tb_join AS (
     LEFT JOIN tb_cliente AS t2
         ON t1.IdCliente = t2.idCliente
 
-    -- Produto mais usado — Vida
+        **Produto mais usado — Vida**
+    
     LEFT JOIN tb_cliente_produto_rn AS t3
         ON t1.IdCliente = t3.IdCliente AND t3.RN_Vida = 1
 
-    -- Produto mais usado — D56
+        **Produto mais usado — D56**
+    
     LEFT JOIN tb_cliente_produto_rn AS t4
         ON t1.IdCliente = t4.IdCliente AND t4.RN_D56  = 1
 
-    -- Produto mais usado — D28
+        **Produto mais usado — D28**
+    
     LEFT JOIN tb_cliente_produto_rn AS t5
         ON t1.IdCliente = t5.IdCliente AND t5.RN_D28  = 1
 
-    -- Produto mais usado — D14
+        **Produto mais usado — D14**
+    
     LEFT JOIN tb_cliente_produto_rn AS t6
         ON t1.IdCliente = t6.IdCliente AND t6.RN_D14  = 1
 
-    -- Produto mais usado — D7
+        **Produto mais usado — D7**
+    
     LEFT JOIN tb_cliente_produto_rn AS t7
         ON t1.IdCliente = t7.IdCliente AND t7.RN_D7   = 1
 
-    -- Dia mais ativo em D28
+        **Dia mais ativo em D28**
+    
     LEFT JOIN tb_cliente_dia_rn AS t8
         ON t1.IdCliente = t8.IdCliente AND t8.RN_Dia  = 1
 
-    -- Período mais ativo em D28
+        **Período mais ativo em D28**
+    
     LEFT JOIN tb_cliente_periodo_rn AS t9
         ON t1.IdCliente = t9.IdCliente AND t9.RN_Periodo = 1
 )
 
-
--- ============================================================
--- OUTPUT FINAL
--- Uma linha por cliente com todas as métricas.
---
--- Engajamento_D28_Vida:
---   Proporção das transações D28 sobre o histórico total.
---   Range: 0.0 (inativo em D28) → 1.0 (toda atividade em D28).
---   NULLIF evita divisão por zero para clientes sem histórico.
--- ============================================================
+---
+    
+OUTPUT FINAL
+    
+    Uma linha por cliente com todas as métricas.
+    
+    Engajamento_D28_Vida:
+    
+        Proporção das transações D28 sobre o histórico total.
+        Range: 0.0 (inativo em D28) → 1.0 (toda atividade em D28).
+        NULLIF evita divisão por zero para clientes sem histórico.
+--------------------------------------------------------------
 SELECT
     *,
     1.0 * Qt_Transações_D28 / NULLIF(Qt_Transações_Vida, 0)  AS Engajamento_D28_Vida
