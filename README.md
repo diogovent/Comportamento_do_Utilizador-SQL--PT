@@ -27,28 +27,31 @@ Ps: "D" - Reference ao nº de dias (ex.: D28 = vigésimo oitavo dia)
 🗂️ Estrutura do Código
 O script é organizado em CTEs (Common Table Expressions) encadeadas, seguindo o fluxo abaixo:
 
-transacoes                clientes          transacao_produto    produtos
-     │                       │                      │               │
-     ▼                       ▼                      └──────┬────────┘
-tb_transações           tb_cliente                         ▼
-     │                       │               tb_transação_produto
-     ├───────────────────────┤                      │
-     ▼                       │               tb_cliente_produto
-tb_sumário_transações        │                      │
-     │                       │               tb_cliente_produto_rn
-     │                       │                      │
-     ▼                       │               ┌──────┘
-tb_cliente_dia               │               │
-     │                       │               │
-tb_cliente_dia_rn            │               │
-     │                       │               │
-tb_cliente_periodo           │               │
-     │                       │               │
-tb_cliente_periodo_rn        │               │
-     │                       │               │
-     └───────────────────────┴───────────────┘
-                             │
-                         tb_join
-                             │
-                      SELECT final
-                    (+ Engajamento_28_Vida)
+## Arquitetura do Projeto
+
+```mermaid
+flowchart TD
+    A[transacoes] --> B[tb_transacoes]
+    C[clientes] --> D[tb_cliente]
+    A --> E[transacao_produto]
+    F[produtos] --> E
+
+    B --> G[tb_sumario_transacoes]
+    B --> H[tb_cliente_dia]
+    H --> I[tb_cliente_dia_rn]
+    B --> J[tb_cliente_periodo]
+    J --> K[tb_cliente_periodo_rn]
+
+    E --> L[tb_transacao_produto]
+    L --> M[tb_cliente_produto]
+    M --> N[tb_cliente_produto_rn]
+
+    G --> O[tb_join]
+    D --> O
+    N --> O
+    I --> O
+    K --> O
+
+    O --> P[SELECT final]
+    P --> Q[Engajamento_28_Vida]
+````
