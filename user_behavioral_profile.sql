@@ -21,6 +21,7 @@ comportamental completo de cada usuário.
 Compatibilidade: SQLite
     
 ⚠️  Nota importante sobre cobertura:
+
     A base possui 4.962 clientes registados, dos quais 1.469(~30%) nunca realizaram transações. 
     Como o output parte detb_sumário_transações (que agrega apenas clientes com aomenos 1 transação), 
     estes clientes inativos são EXCLUÍDOS do resultado final. Para incluí-los, o ponto de partida deve 
