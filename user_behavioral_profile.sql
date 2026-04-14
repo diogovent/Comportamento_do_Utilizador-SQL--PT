@@ -3,6 +3,10 @@ Programa de Pontos — Plataforma Twitch / Cursos
 ============================================================
 Objetivo: Construir uma tabela analítica com o perfil
 comportamental completo de cada usuário.
+
+# **Importante**
+    Este é só um documento para ver se fôr para rodar o programa é necessário usar o documento "etl.projeto.sql" que está neste repositório
+    
     
  Métricas geradas:
     • Quantidade de transações         (Vida, D7, D14, D28, D56)
@@ -23,11 +27,12 @@ Compatibilidade: SQLite
 ⚠️  Nota importante sobre cobertura:
 
     A base possui 4.962 clientes registados, dos quais 1.469(~30%) nunca realizaram transações. 
+    
     Como o output parte detb_sumário_transações (que agrega apenas clientes com aomenos 1 transação), 
     estes clientes inativos são EXCLUÍDOS do resultado final. Para incluí-los, o ponto de partida deve 
     ser a tabela `clientes` com LEFT JOINs.
     
-============================================================
+---
 
 1. tb_transações
     Limpeza e enriquecimento da tabela de transações brutas.
@@ -40,9 +45,7 @@ Compatibilidade: SQLite
     
         • Dt_Hora: hora extraída como integer para classificação de período do dia na CTE tb_cliente_periodo.
 
-WITH
-tb_transações AS (
-
+WITH tb_transações AS (
     SELECT
         IdTransacao,
         IdCliente,
@@ -54,73 +57,68 @@ tb_transações AS (
     FROM transacoes
 ),
 
+---
+    
+2. tb_cliente
+    
+    Extrai dados de cadastro e flags de plataforma de cada cliente.
+    
+        • Idade_Base: dias corridos desde o cadastro. Permite segmentar clientes novos vs. maduros.
+    
+        • Flags de plataforma (1 = conectado, 0 = não conectado): flTwitch (principal, ~69% dos clientes), 
+    flEmail (~4%),flYouTube (~3%), flBlueSky e flInstagram (ainda não usados).
 
--- ------------------------------------------------------------
--- 2. tb_cliente
--- Extrai dados de cadastro e flags de plataforma de cada cliente.
---
--- • Idade_Base: dias corridos desde o cadastro. Permite
---   segmentar clientes novos vs. maduros.
--- • Flags de plataforma (1 = conectado, 0 = não conectado):
---   flTwitch (principal, ~69% dos clientes), flEmail (~4%),
---   flYouTube (~3%), flBlueSky e flInstagram (ainda não usados).
--- ------------------------------------------------------------
-tb_cliente AS (
-
-    SELECT
-        idCliente,
-        julianday('now') - julianday(substr(DtCriacao, 1, 10))      AS Idade_Base,
-        flTwitch,
-        flYouTube,
-        flEmail,
-        flBlueSky,
-        flInstagram
-
-    FROM clientes
+    
+tb_cliente as (
+    SELECT idCliente,
+           datetime(substr(DtCriacao,1,19)) as Dt_Criação,
+           julianday("now") - julianday(substr(DtCriacao,1,10)) as Idade_Base
+    
+    From clientes
 ),
 
+---
+    
+3. tb_sumário_transações
+    
+    Agregação central por cliente — todas as métricas de volume, recência e pontos segmentadas por janela temporal.
+    
+        • Janelas: Vida (histórico completo), D56, D28, D14, D7.
+    
+        • Dias_Ultima_Interação: MIN(Diff_Date) = transação mais recente. Quanto menor, mais recente o cliente.
+    
+        • Saldo_Pontos: soma de todos os movimentos (positivo = crédito, negativo = resgate). 
+    Validado contra clientes.qtdePontos — os valores batem exatamente.
+    
+        • Pontos negativos são mantidos como valores negativos, facilitando a distinção crédito/débito na análise. 
+    Na base atual, resgates representam < 1% das transações.
 
--- ------------------------------------------------------------
--- 3. tb_sumário_transações
--- Agregação central por cliente — todas as métricas de volume,
--- recência e pontos segmentadas por janela temporal.
---
--- • Janelas: Vida (histórico completo), D56, D28, D14, D7.
--- • Dias_Ultima_Interação: MIN(Diff_Date) = transação mais
---   recente. Quanto menor, mais recente o cliente.
--- • Saldo_Pontos: soma de todos os movimentos (positivo =
---   crédito, negativo = resgate). Validado contra
---   clientes.qtdePontos — os valores batem exatamente.
--- • Pontos negativos são mantidos como valores negativos,
---   facilitando a distinção crédito/débito na análise.
---   Na base atual, resgates representam < 1% das transações.
--- ------------------------------------------------------------
 tb_sumário_transações AS (
 
     SELECT
         IdCliente,
 
-        -- Volume de transações por janela temporal
-        COUNT(IdTransacao)                                                               AS Qt_Transações_Vida,
+          **Volume de transações por janela temporal**
+        COUNT(IdTransacao)                                                              AS Qt_Transações_Vida,
         COUNT(CASE WHEN Diff_Date <= 56 THEN IdTransacao END)                           AS Qt_Transações_D56,
         COUNT(CASE WHEN Diff_Date <= 28 THEN IdTransacao END)                           AS Qt_Transações_D28,
         COUNT(CASE WHEN Diff_Date <= 14 THEN IdTransacao END)                           AS Qt_Transações_D14,
         COUNT(CASE WHEN Diff_Date <=  7 THEN IdTransacao END)                           AS Qt_Transações_D7,
 
-        -- Recência: distância em dias da última interação
+          **Recência: distância em dias da última interação**
         MIN(Diff_Date)                                                                   AS Dias_Ultima_Interação,
 
-        -- Saldo atual = créditos acumulados − resgates
+          **Saldo atual = créditos acumulados − resgates**
         SUM(QtdePontos)                                                                  AS Saldo_Pontos,
 
-        -- Créditos (pontos recebidos) por janela
+         **Créditos (pontos recebidos) por janela**
         SUM(CASE WHEN QtdePontos >  0                     THEN QtdePontos ELSE 0 END)   AS Pontos_Positivos_Vida,
         SUM(CASE WHEN QtdePontos >  0 AND Diff_Date <= 56 THEN QtdePontos ELSE 0 END)   AS Pontos_Positivos_D56,
         SUM(CASE WHEN QtdePontos >  0 AND Diff_Date <= 28 THEN QtdePontos ELSE 0 END)   AS Pontos_Positivos_D28,
         SUM(CASE WHEN QtdePontos >  0 AND Diff_Date <= 14 THEN QtdePontos ELSE 0 END)   AS Pontos_Positivos_D14,
         SUM(CASE WHEN QtdePontos >  0 AND Diff_Date <=  7 THEN QtdePontos ELSE 0 END)   AS Pontos_Positivos_D7,
 
-        -- Débitos (resgates de pontos) por janela — valores negativos
+          **Débitos (resgates de pontos) por janela — valores negativos**
         SUM(CASE WHEN QtdePontos <  0                     THEN QtdePontos ELSE 0 END)   AS Pontos_Negativos_Vida,
         SUM(CASE WHEN QtdePontos <  0 AND Diff_Date <= 56 THEN QtdePontos ELSE 0 END)   AS Pontos_Negativos_D56,
         SUM(CASE WHEN QtdePontos <  0 AND Diff_Date <= 28 THEN QtdePontos ELSE 0 END)   AS Pontos_Negativos_D28,
@@ -131,23 +129,26 @@ tb_sumário_transações AS (
     GROUP BY IdCliente
 ),
 
+---
 
--- ------------------------------------------------------------
--- 4. tb_transação_produto
--- Enriquece cada transação com nome e categoria do produto.
---
--- Estrutura do join:
---   transacoes ──(1:N)── transacao_produto ──(N:1)── produtos
---
--- Cobertura do join: 99,86% das linhas têm produto identificado.
--- Os ~0,14% sem match correspondem a IdProduto vazio ('').
---
--- Os produtos dividem-se em dois grupos:
---   1. Ações de engajamento: 'ChatMessage', 'Lista de presença',
---      'Presença Streak' — representam > 97% do volume.
---   2. Itens RPG (espadas, armaduras, etc.) — transações de
---      resgate, onde o cliente gasta pontos acumulados.
--- ------------------------------------------------------------
+4. tb_transação_produto
+    
+    Enriquece cada transação com nome e categoria do produto.
+
+    Estrutura do join:
+        transacoes ──(1:N)── transacao_produto ──(N:1)── produtos
+
+    Cobertura do join: 99,86% das linhas têm produto identificado.
+
+    Os ~0,14% sem match correspondem a IdProduto vazio ('').
+
+    Os produtos dividem-se em dois grupos:
+
+        1. Ações de engajamento: 'ChatMessage', 'Lista de presença', 'Presença Streak' — representam > 97% do volume.
+    
+        2. Itens RPG (espadas, armaduras, etc.) — transações de resgate, onde o cliente gasta pontos acumulados.
+
+    
 tb_transação_produto AS (
 
     SELECT
@@ -163,15 +164,15 @@ tb_transação_produto AS (
     LEFT JOIN produtos AS t3
         ON t2.IdProduto = t3.IdProduto
 ),
+    
+---
+    
+5. tb_cliente_produto
 
+    Conta quantas vezes cada cliente interagiu com cada produto, por janela temporal.
+    
+    Inclui DescCategoriaProduto para enriquecer o perfil final além do nome do produto mais usado.
 
--- ------------------------------------------------------------
--- 5. tb_cliente_produto
--- Conta quantas vezes cada cliente interagiu com cada produto,
--- por janela temporal.
--- Inclui DescCategoriaProduto para enriquecer o perfil final
--- além do nome do produto mais usado.
--- ------------------------------------------------------------
 tb_cliente_produto AS (
 
     SELECT
