@@ -4,7 +4,7 @@ Programa de Pontos — Plataforma Twitch / Cursos
 Objetivo: Construir uma tabela analítica com o perfil
 comportamental completo de cada usuário.
 
-# **Importante**
+**Importante**
     Este é só um documento para ver se fôr para rodar o programa é necessário usar o documento "etl.projeto.sql" que está neste repositório
     
     
@@ -45,6 +45,7 @@ Compatibilidade: SQLite
     
         • Dt_Hora: hora extraída como integer para classificação de período do dia na CTE tb_cliente_periodo.
 
+--------------------------------------------------------------
 WITH tb_transações AS (
     SELECT
         IdTransacao,
@@ -68,7 +69,7 @@ WITH tb_transações AS (
         • Flags de plataforma (1 = conectado, 0 = não conectado): flTwitch (principal, ~69% dos clientes), 
     flEmail (~4%),flYouTube (~3%), flBlueSky e flInstagram (ainda não usados).
 
-    
+--------------------------------------------------------------  
 tb_cliente as (
     SELECT idCliente,
            datetime(substr(DtCriacao,1,19)) as Dt_Criação,
@@ -92,7 +93,8 @@ tb_cliente as (
     
         • Pontos negativos são mantidos como valores negativos, facilitando a distinção crédito/débito na análise. 
     Na base atual, resgates representam < 1% das transações.
-
+    
+--------------------------------------------------------------
 tb_sumário_transações AS (
 
     SELECT
@@ -148,7 +150,7 @@ tb_sumário_transações AS (
     
         2. Itens RPG (espadas, armaduras, etc.) — transações de resgate, onde o cliente gasta pontos acumulados.
 
-    
+--------------------------------------------------------------
 tb_transação_produto AS (
 
     SELECT
@@ -172,7 +174,8 @@ tb_transação_produto AS (
     Conta quantas vezes cada cliente interagiu com cada produto, por janela temporal.
     
     Inclui DescCategoriaProduto para enriquecer o perfil final além do nome do produto mais usado.
-
+    
+-- ------------------------------------------------------------
 tb_cliente_produto AS (
 
     SELECT
@@ -189,15 +192,17 @@ tb_cliente_produto AS (
     GROUP BY IdCliente, DescNomeProduto, DescCategoriaProduto
 ),
 
+---
+    
+6. tb_cliente_produto_rn
+    
+    Ranqueia produtos por frequência de uso em cada janela.
+    
+    RN = 1 identifica o produto mais utilizado.
 
--- ------------------------------------------------------------
--- 6. tb_cliente_produto_rn
--- Ranqueia produtos por frequência de uso em cada janela.
--- RN = 1 identifica o produto mais utilizado.
---
--- ⚠️  Em caso de empate, ROW_NUMBER() desempata por
---     DescNomeProduto ASC para garantir determinismo.
--- ------------------------------------------------------------
+    ⚠️  Em caso de empate, ROW_NUMBER() desempata por DescNomeProduto ASC para garantir determinismo.
+    
+--------------------------------------------------------------
 tb_cliente_produto_rn AS (
 
     SELECT
@@ -211,15 +216,17 @@ tb_cliente_produto_rn AS (
     FROM tb_cliente_produto
 ),
 
-
--- ------------------------------------------------------------
--- 7. tb_cliente_dia
--- Conta transações por dia da semana nos últimos 28 dias.
---
--- strftime('%w', ...) retorna TEXT:
---   '0'=Domingo | '1'=Segunda | '2'=Terça | '3'=Quarta
---   '4'=Quinta  | '5'=Sexta   | '6'=Sábado
--- ------------------------------------------------------------
+---
+    
+7. tb_cliente_dia
+    
+    Conta transações por dia da semana nos últimos 28 dias.
+    
+    strftime('%w', ...) retorna TEXT:
+    
+        '0'=Domingo | '1'=Segunda | '2'=Terça | '3'=Quarta |'4'=Quinta  | '5'=Sexta   | '6'=Sábado
+    
+--------------------------------------------------------------
 tb_cliente_dia AS (
 
     SELECT
@@ -232,13 +239,16 @@ tb_cliente_dia AS (
     GROUP BY IdCliente, Dia_Semana
 ),
 
-
--- ------------------------------------------------------------
--- 8. tb_cliente_dia_rn
--- Ranqueia os dias da semana por volume de transações.
--- RN = 1 → dia mais ativo nos últimos 28 dias.
--- Desempate por Dia_Semana ASC para determinismo.
--- ------------------------------------------------------------
+---
+    
+8. tb_cliente_dia_rn
+    
+    Ranqueia os dias da semana por volume de transações.
+    
+    RN = 1 → dia mais ativo nos últimos 28 dias.
+    
+    Desempate por Dia_Semana ASC para determinismo.
+--------------------------------------------------------------
 tb_cliente_dia_rn AS (
 
     SELECT
@@ -248,18 +258,20 @@ tb_cliente_dia_rn AS (
     FROM tb_cliente_dia
 ),
 
+---
 
--- ------------------------------------------------------------
--- 9. tb_cliente_periodo
--- Classifica transações dos últimos 28 dias por período do dia
--- e conta o total por cliente e período.
---
--- Faixas horárias definidas:
---   Manhã:     07h – 12h
---   Tarde:     13h – 18h
---   Noite:     19h – 23h
---   Madrugada: 00h – 06h
--- ------------------------------------------------------------
+9. tb_cliente_periodo
+    
+    Classifica transações dos últimos 28 dias por período do dia e conta o total por cliente e período.
+    
+    Faixas horárias definidas:
+    
+        Manhã:     07h – 12h
+        Tarde:     13h – 18h
+        Noite:     19h – 23h
+        Madrugada: 00h – 06h
+    
+--------------------------------------------------------------
 tb_cliente_periodo AS (
 
     SELECT
