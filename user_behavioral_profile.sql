@@ -323,15 +323,7 @@ tb_join AS (
 
     SELECT
         t1.*,
-
-            **Dados cadastrais e plataformas conectadas**
-    
         t2.Idade_Base,
-        t2.flTwitch,
-        t2.flYouTube,
-        t2.flEmail,
-        t2.flBlueSky,
-        t2.flInstagram,
 
             **Produto + categoria mais usados por janela temporal**
     
