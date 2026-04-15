@@ -70,30 +70,31 @@ A query constrói uma **tabela analítica one-row-per-user** pronta para segment
 ## 🗂️ Arquitetura da Query
 
 O script é organizado em **11 CTEs encadeadas**:
-transacoes             clientes         transacao_produto   produtos
-│                    │                     │               │
-▼                    ▼                     └──────┬────────┘
-tb_transações         tb_cliente                       ▼
-│                    │               tb_transação_produto
-│                    │                       │
-▼                    │               tb_cliente_produto
-tb_sumário_transações     │                       │
-│                    │               tb_cliente_produto_rn
-│                    │                       │
-tb_cliente_dia            │               ┌───────┘
-│                    │               │
-tb_cliente_dia_rn         │               │
-│                    │               │
-tb_cliente_periodo        │               │
-│                    │               │
-tb_cliente_periodo_rn     │               │
-│                    │               │
-└────────────────────┴───────────────┘
-│
-tb_join
-│
-SELECT final
-(+ Engajamento_D28_Vida)
+
+    transacoes             clientes         transacao_produto   produtos
+         │                    │                     │               │
+         ▼                    ▼                     └──────┬────────┘
+    tb_transações         tb_cliente                       ▼
+         │                    │               tb_transação_produto
+         │                    │                       │
+         ▼                    │               tb_cliente_produto
+    tb_sumário_transações     │                       │
+         │                    │               tb_cliente_produto_rn
+         │                    │                       │
+    tb_cliente_dia            │               ┌───────┘
+         │                    │               │
+    tb_cliente_dia_rn         │               │
+         │                    │               │
+    tb_cliente_periodo        │               │
+         │                    │               │
+    tb_cliente_periodo_rn     │               │
+         │                    │               │
+         └────────────────────┴───────────────┘
+                              │
+                          tb_join
+                              │
+                       SELECT final
+                   (+ Engajamento_D28_Vida)
 
 ### Descrição de cada CTE
 
