@@ -1,8 +1,4 @@
-# Comportamento_do_Utilizador-SQL--PT
-
-
-Claro! Aqui está o texto raw para colares diretamente no editor do GitHub (ficheiro README.md):
-markdown# 👤 User Behavioral Profile — SQL Analysis
+# 👤 Comportamento_do_Utilizador-SQL--PT
 
 > Construção de um perfil comportamental completo dos usuários de um programa de pontos baseado na plataforma **Twitch**, utilizando SQL puro (SQLite).
 
