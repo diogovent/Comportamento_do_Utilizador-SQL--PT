@@ -12,6 +12,8 @@ A query constrói uma **tabela analítica one-row-per-user** pronta para segment
 
 Os dados foram retirados deste site: https://www.kaggle.com/datasets/teocalvo/teomewhy-loyalty-system
 
+Para poder rodar o projeto na sua máquina tem de transferir o documento "etl_projeto.sql" e se quiser ver as minhas anotações pode abrir (por aqui o git hub) o "user_behavioral_profile.sql".
+
 ---
 
 ## 🗃️ Base de Dados
