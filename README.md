@@ -10,6 +10,8 @@ Este é um programa de fidelidade em que usuários acumulam pontos através de a
 
 A query constrói uma **tabela analítica one-row-per-user** pronta para segmentação, clustering, modelos de churn ou dashboards de CRM.
 
+Os dados foram retirados deste site: https://www.kaggle.com/datasets/teocalvo/teomewhy-loyalty-system
+
 ---
 
 ## 🗃️ Base de Dados
