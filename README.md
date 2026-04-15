@@ -104,7 +104,7 @@ O meu é meu projeto é organizado em **11 CTEs encadeadas**:
 | 2 | `tb_cliente` | Idade na base + flags de plataformas conectadas |
 | 3 | `tb_sumário_transações` | Contagem de transações, saldo e pontos por janelas temporais |
 | 4 | `tb_transação_produto` | Enriquece transações com nome e categoria do produto |
-| 5 | `tb_cliente_produto` | Frequência de uso por produto, cliente e janela |
+| 5 | `tb_cliente_produto` | Frequência de uso por produto e categoria, cliente e janela |
 | 6 | `tb_cliente_produto_rn` | `ROW_NUMBER` para produto mais usado em cada janela |
 | 7 | `tb_cliente_dia` | Transações por dia da semana (D28) |
 | 8 | `tb_cliente_dia_rn` | `ROW_NUMBER` para dia mais ativo |
